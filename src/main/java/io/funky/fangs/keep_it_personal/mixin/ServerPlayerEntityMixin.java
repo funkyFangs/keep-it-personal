@@ -47,9 +47,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     @Override
     public void dropInventory(ServerWorld world) {
         if (!world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
-            this.vanishCursedItems();
-
             final var preferences = getDeathPreferences();
+
+            if (!preferences.contains(DeathPreference.CURSED)) {
+                this.vanishCursedItems();
+            }
+
             final var inventory = getInventory();
 
             final Stream.Builder<ItemStack> itemsToDrop = Stream.builder();
