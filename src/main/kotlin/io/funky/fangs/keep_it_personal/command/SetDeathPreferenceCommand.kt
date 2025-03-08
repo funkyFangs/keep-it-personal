@@ -13,7 +13,8 @@ enum class DeathPreference(
     EXPERIENCE("experience"),
     HOTBAR("hotbar"),
     ARMOR("armor"),
-    OFFHAND("offhand");
+    OFFHAND("offhand"),
+    CURSED("cursed");
 
     override fun toString(): String {
         return preferenceName
