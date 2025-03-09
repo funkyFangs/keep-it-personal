@@ -1,10 +1,14 @@
 package io.funky.fangs.keep_it_personal.command
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import com.mojang.brigadier.Command.SINGLE_SUCCESS
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
+import java.util.function.Function.identity
+import java.util.stream.Collectors.toUnmodifiableMap
 
 enum class DeathPreference(
     private val preferenceName: String
@@ -16,6 +20,17 @@ enum class DeathPreference(
     OFFHAND("offhand"),
     CURSED("cursed");
 
+    companion object {
+        private val VALUE_MAP: Map<String, DeathPreference> = entries.stream()
+            .collect(toUnmodifiableMap(DeathPreference::toString, identity()))
+
+        @JsonCreator
+        fun fromString(value: String): DeathPreference? {
+            return VALUE_MAP[value]
+        }
+    }
+
+    @JsonValue
     override fun toString(): String {
         return preferenceName
     }

@@ -19,15 +19,21 @@ class KeepCommandState(
         private const val PLAYER_PREFERENCES_TAG = "playerPreferences"
 
         private fun fromNbt(nbtCompound: NbtCompound): KeepCommandState {
+            val (disabled, enabled) = KeepItPersonalModInitializer.CONFIGURATION.preferences
             val playerPreferencesCompound = nbtCompound.getCompound(PLAYER_PREFERENCES_TAG)
             return KeepCommandState(
                 playerPreferencesCompound.keys
                     .stream()
                     .collect(toMap(UUID::fromString) { playerId ->
-                        EnumSet.copyOf(
-                            playerPreferencesCompound.getIntArray(playerId)
-                                .map { ordinal -> DeathPreference.entries[ordinal] }
-                        )
+                        val preferences = playerPreferencesCompound.getIntArray(playerId)
+                            .map(DeathPreference.entries::get)
+                            .minus(disabled)
+                            .plus(enabled)
+
+                        if (preferences.isEmpty())
+                            EnumSet.noneOf(DeathPreference::class.java)
+                        else
+                            EnumSet.copyOf(preferences)
                     })
             )
         }
@@ -46,17 +52,24 @@ class KeepCommandState(
     }
 
     override fun writeNbt(nbtCompound: NbtCompound, registries: RegistryWrapper.WrapperLookup?): NbtCompound {
+        val (disabled, enabled) = KeepItPersonalModInitializer.CONFIGURATION.preferences
         val playerPreferencesCompound = nbtCompound.getCompound(PLAYER_PREFERENCES_TAG)
         playerPreferences.forEach { (playerId, preferences) ->
-            playerPreferencesCompound.putIntArray(playerId.toString(), preferences.map { it.ordinal }.toIntArray())
+            playerPreferencesCompound.putIntArray(
+                playerId.toString(),
+                preferences.plus(enabled).minus(disabled).map { it.ordinal }.toIntArray()
+            )
         }
         return nbtCompound
     }
 
     fun getPlayerPreferences(playerId: UUID): Set<DeathPreference> {
-        return unmodifiableSet(
-            playerPreferences.computeIfAbsent(playerId) { EnumSet.noneOf(DeathPreference::class.java) }
-        )
+        val currentPreferences = playerPreferences.computeIfAbsent(playerId) { EnumSet.noneOf(DeathPreference::class.java) }
+        val (disabled, enabled) = KeepItPersonalModInitializer.CONFIGURATION.preferences
+
+        val preferences = currentPreferences.minus(disabled).plus(enabled)
+
+        return if (preferences.isEmpty()) emptySet() else unmodifiableSet(EnumSet.copyOf(preferences))
     }
 
     fun addPlayerPreference(playerId: UUID, preference: DeathPreference) {
@@ -90,10 +103,24 @@ class KeepCommandState(
     }
 
     fun fillPlayerPreferences(playerId: UUID) {
-        addPlayerPreferences(playerId, EnumSet.allOf(DeathPreference::class.java))
+        val (disabled) = KeepItPersonalModInitializer.CONFIGURATION.preferences
+
+        val preferences = if (disabled.isEmpty())
+            EnumSet.allOf(DeathPreference::class.java)
+        else
+            EnumSet.complementOf(EnumSet.copyOf(disabled))
+
+        addPlayerPreferences(playerId, preferences)
     }
 
     fun clearPlayerPreferences(playerId: UUID) {
-        removePlayerPreferences(playerId, EnumSet.allOf(DeathPreference::class.java))
+        val (_, enabled) = KeepItPersonalModInitializer.CONFIGURATION.preferences
+
+        val preferences = if (enabled.isEmpty())
+            EnumSet.allOf(DeathPreference::class.java)
+        else
+            EnumSet.complementOf(EnumSet.copyOf(enabled))
+
+        removePlayerPreferences(playerId, preferences)
     }
 }
