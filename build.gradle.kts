@@ -47,6 +47,9 @@ dependencies {
     modImplementation(libs.fabric.language.kotlin)
     modImplementation(libs.fabric.loader)
 
+    // Jackson
+    implementation(libs.jackson.dataformat.toml)
+
     // Minecraft
     minecraft(libs.minecraft)
 
