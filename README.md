@@ -63,6 +63,10 @@ disables every preference but `experience`.
 disabled = ['armor', 'offhand', 'hotbar', 'inventory', 'cursed']
 ```
 
+### Defaults
+
+By default, no preferences are disabled.
+
 ## Enable Specific Preferences
 
 If you want a specific set of preferences to _always_ be enabled, you can similarly use the `preferences.enabled` property. For example, the following forces `armor` and `offhand` to be enabled.
@@ -72,6 +76,33 @@ If you want a specific set of preferences to _always_ be enabled, you can simila
 enabled = ['armor', 'offhand']
 ```
 
+### Defaults
+
+By default, no preferences are enabled.
+
 # Permissions
 
-Permission support is planned but not currently available.
+Each command can be controlled with a specific permission. The following table contains the full list of permissions.
+
+|               Permission                | Description                                                 |
+|:---------------------------------------:|:------------------------------------------------------------|
+|       `keep_it_personal.keeping`        | View all the preferences they have selected                 |
+| `keep_it_personal.keeping.<preference>` | View and update a specific preference                       |
+|  `keep_it_personal.keeping.everything`  | Add every available preference to selected preferences      |
+|   `keep_it_personal.keeping.nothing`    | Remove every available preference from selected preferences |
+
+
+## Permission Configuration Properties
+
+Additionally, in your configuration file, you may specify a default permission level to fall back to. For example, to let
+anyone with permission level 1 be able to use this command, you would specify the following in `keep_it_personal.toml`.
+
+```toml
+[permissions]
+permissionLevel = 1
+```
+
+### Defaults
+
+The default permission level is 0 which is given to every player. If you wish to control permissions with a permission
+manager, you should update the permission level accordingly.
