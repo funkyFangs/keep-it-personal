@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import com.mojang.brigadier.arguments.BoolArgumentType
 import io.funky.fangs.keep_it_personal.command.*
 import io.funky.fangs.keep_it_personal.configuration.KeepItPersonalConfiguration
+import me.lucko.fabric.api.permissions.v0.Permissions
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.loader.api.FabricLoader
@@ -33,15 +34,28 @@ class KeepItPersonalModInitializer: ModInitializer {
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             val keepCommand = CommandManager.literal(KEEP_COMMAND)
 
-            dispatcher.register(keepCommand.executes(ViewDeathPreferencesCommand()))
+            val defaultPermissionLevel = CONFIGURATION.permissions.permissionLevel
+
+            dispatcher.register(
+                keepCommand.requires(Permissions.require("${MOD_ID}.${KEEP_COMMAND}", defaultPermissionLevel))
+                    .executes(ViewDeathPreferencesCommand())
+            )
 
             DeathPreference.entries
                 .filterNot { enabled.contains(it) || disabled.contains(it) }
                 .forEach {
                     dispatcher.register(
                         keepCommand.then(CommandManager.literal(it.toString())
+                            .requires(Permissions.require(
+                                "${MOD_ID}.${KEEP_COMMAND}.${it}",
+                                defaultPermissionLevel
+                            ))
                             .executes(GetDeathPreferenceCommand(it))
                             .then(CommandManager.argument(ARGUMENT_NAME, BoolArgumentType.bool())
+                                .requires(Permissions.require(
+                                    "${MOD_ID}.${KEEP_COMMAND}.${it}",
+                                    defaultPermissionLevel
+                                ))
                                 .executes(SetDeathPreferenceCommand(it))
                             )
                         )
@@ -50,12 +64,20 @@ class KeepItPersonalModInitializer: ModInitializer {
 
             dispatcher.register(
                 keepCommand.then(CommandManager.literal(FillDeathPreferencesCommand.NAME)
+                    .requires(Permissions.require(
+                        "${MOD_ID}.${KEEP_COMMAND}.${FillDeathPreferencesCommand.NAME}",
+                        defaultPermissionLevel
+                    ))
                     .executes(FillDeathPreferencesCommand())
                 )
             )
 
             dispatcher.register(
                 keepCommand.then(CommandManager.literal(ClearDeathPreferencesCommand.NAME)
+                    .requires(Permissions.require(
+                        "${MOD_ID}.${KEEP_COMMAND}.${ClearDeathPreferencesCommand.NAME}",
+                        defaultPermissionLevel
+                    ))
                     .executes(ClearDeathPreferencesCommand())
                 )
             )
