@@ -2,12 +2,22 @@
   "schemaVersion": 1,
   "id": "keep-it-personal",
   "version": "${version}",
-  "name": "keep-it-personal",
+  "name": "Keep It Personal",
   "description": "This is a Fabric server mod which enables customizable keep-inventory rules on a per-player basis.",
   "authors": [
-    "funkyFangs"
+    {
+      "name": "Harper Price",
+      "contact": {
+        "email": "harper-price@outlook.com",
+        "homepage": "https://github.com/funkyFangs"
+      }
+    }
   ],
-  "contact": {},
+  "contact": {
+    "sources": "https://github.com/funkyFangs/keep-it-personal",
+    "issues": "https://github.com/funkyFangs/keep-it-personal/issues",
+    "homepage": "https://modrinth.com/project/keep-it-personal"
+  },
   "license": "CC-BY-SA-4.0",
   "environment": "server",
   "entrypoints": {
@@ -19,10 +29,10 @@
      "keep_it_personal.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric-language-kotlin": ">=${kotlin_loader_version}",
+    "fabricloader": "~${loader_version}",
+    "fabric-language-kotlin": "~${kotlin_loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "fabric-permissions-api-v0": ">=${fabric_permissions_api_version}"
+    "fabric-permissions-api-v0": "~${fabric_permissions_api_version}"
   }
 }
