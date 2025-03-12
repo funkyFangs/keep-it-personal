@@ -49,7 +49,7 @@ dependencies {
     modImplementation(libs.fabric.permissions.api)
 
     // Jackson
-    implementation(libs.jackson.dataformat.toml)
+    modImplementation(libs.jackson.dataformat.toml)
 
     // Minecraft
     minecraft(libs.minecraft)
