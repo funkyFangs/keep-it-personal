@@ -25,6 +25,24 @@
       "io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer"
     ]
   },
+  "contributors": [
+    {
+      "name": "Harper Price",
+      "contact": {
+        "email": "harper-price@outlook.com",
+        "homepage": "https://github.com/funkyFangs",
+        "role": "Developer"
+      }
+    },
+    {
+      "name": "Maris Price",
+      "contact": {
+        "email": "marisprice01@gmail.com",
+        "homepage": "https://www.marisprice.com",
+        "role": "Graphic Designer"
+      }
+    }
+  ],
   "mixins": [
      "keep_it_personal.mixins.json"
   ],
