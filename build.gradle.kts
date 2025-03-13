@@ -1,37 +1,23 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+/*================*\
+ ‖  Dependencies  ‖
+\*================*/
+
+/*-----------*\
+ |  Plugins  |
+\*-----------*/
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.fabric.loom)
     id("maven-publish")
 }
 
-version = libs.versions.project.get()
-val projectName: String by project
-
-base {
-    archivesName.set(projectName)
-}
-
-val targetJavaVersion = Integer.parseInt(libs.versions.java.get())
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
-loom {
-    splitEnvironmentSourceSets()
-
-    mods {
-        register(projectName) {
-            sourceSet("main")
-        }
-    }
-}
+/*----------------*\
+ |  Repositories  |
+\*----------------*/
 
 repositories {
     // Add repositories to retrieve artifacts from in here.
@@ -41,6 +27,10 @@ repositories {
     // for more information about repositories.
 }
 
+/*----------------*\
+ |  Dependencies  |
+\*----------------*/
+
 dependencies {
     // Fabric
     modImplementation(libs.fabric.api)
@@ -49,14 +39,27 @@ dependencies {
     modImplementation(libs.fabric.permissions.api)
 
     // Jackson
-    modImplementation(libs.jackson.dataformat.toml)
+    implementation(libs.jackson.dataformat.toml)
 
     // Minecraft
     minecraft(libs.minecraft)
 
     // Yarn
     mappings("${libs.yarn.get()}:v2")
+
+    // Included Dependencies
+    for (dependency in libs.bundles.included.get()) {
+        include(dependency)
+    }
 }
+
+/*===============*\
+ ‖  Compilation  ‖
+\*===============*/
+
+/*-------------*\
+ |  Resources  |
+\*-------------*/
 
 tasks.processResources {
     inputs.property("version", project.version)
@@ -75,6 +78,19 @@ tasks.processResources {
     }
 }
 
+/*--------*\
+ |  Java  |
+\*--------*/
+
+val targetJavaVersion = Integer.parseInt(libs.versions.java.get())
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+}
+
 tasks.withType<JavaCompile>().configureEach {
     // ensure that the encoding is set to UTF-8, no matter what the system default is
     // this fixes some edge cases with special characters not displaying correctly
@@ -83,6 +99,10 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(targetJavaVersion)
 }
+
+/*----------*\
+ |  Kotlin  |
+\*----------*/
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions.jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
@@ -93,6 +113,32 @@ tasks.jar {
         rename { "${it}_${project.base.archivesName}" }
     }
 }
+
+/*------------*\
+ |  Artifact  |
+\*------------*/
+
+version = libs.versions.project.get()
+val projectName: String by project
+
+base {
+    archivesName.set(projectName)
+}
+
+loom {
+    serverOnlyMinecraftJar()
+    splitEnvironmentSourceSets()
+
+    mods {
+        register(projectName) {
+            sourceSet("main")
+        }
+    }
+}
+
+/*==============*\
+ ‖  Publishing  ‖
+\*==============*/
 
 // configure the maven publication
 publishing {
