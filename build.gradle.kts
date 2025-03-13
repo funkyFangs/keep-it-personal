@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.fabric.loom)
     id("maven-publish")
+    alias(libs.plugins.shadow)
 }
 
 version = libs.versions.project.get()

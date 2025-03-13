@@ -23,6 +23,9 @@ minecraft = '1.21.4'
 # Project
 project = '1.0.1-SNAPSHOT'
 
+# Shadow
+shadow = '8.3.6'
+
 # Yarn
 yarn = '1.21.4+build.8'
 
@@ -50,3 +53,6 @@ fabric-loom = {id = 'fabric-loom', version.ref = 'fabric-loom'}
 
 # Kotlin
 kotlin-jvm = {id = 'org.jetbrains.kotlin.jvm', version.ref = 'kotlin'}
+
+# Shadow
+shadow = {id = 'com.gradleup.shadow', version.ref = 'shadow'}
