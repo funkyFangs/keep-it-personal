@@ -22,7 +22,10 @@
   "environment": "server",
   "entrypoints": {
     "main": [
-      "io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer"
+      {
+        "adapter": "kotlin",
+        "value": "io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer"
+      }
     ]
   },
   "contributors": [

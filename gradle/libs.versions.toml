@@ -23,9 +23,6 @@ minecraft = '1.21.4'
 # Project
 project = '1.0.1-SNAPSHOT'
 
-# Shadow
-shadow = '8.3.6'
-
 # Yarn
 yarn = '1.21.4+build.8'
 
@@ -38,6 +35,10 @@ fabric-loader = {group = 'net.fabricmc', name = 'fabric-loader', version.ref = '
 fabric-permissions-api = {group = 'me.lucko', name = 'fabric-permissions-api', version.ref = 'fabric-permissions-api'}
 
 # Jackson
+jackson-annotations = {group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson'}
+jackson-bom = {group = 'com.fasterxml.jackson', name = 'jackson-bom', version.ref = 'jackson'}
+jackson-core = {group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson'}
+jackson-databind = {group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson'}
 jackson-dataformat-toml = {group = 'com.fasterxml.jackson.dataformat', name = 'jackson-dataformat-toml', version.ref = 'jackson'}
 
 # Minecraft
@@ -54,5 +55,12 @@ fabric-loom = {id = 'fabric-loom', version.ref = 'fabric-loom'}
 # Kotlin
 kotlin-jvm = {id = 'org.jetbrains.kotlin.jvm', version.ref = 'kotlin'}
 
-# Shadow
-shadow = {id = 'com.gradleup.shadow', version.ref = 'shadow'}
+[bundles]
+
+included = [
+    'jackson-annotations',
+    'jackson-bom',
+    'jackson-core',
+    'jackson-databind',
+    'jackson-dataformat-toml'
+]
