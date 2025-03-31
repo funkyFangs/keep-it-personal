@@ -34,12 +34,14 @@ repositories {
 dependencies {
     // Fabric
     modImplementation(libs.fabric.api)
-    modImplementation(libs.fabric.language.kotlin)
     modImplementation(libs.fabric.loader)
     modImplementation(libs.fabric.permissions.api)
 
     // Jackson
     implementation(libs.jackson.dataformat.toml)
+
+    // Jakarta
+    compileOnly(libs.jakarta.annotation.api)
 
     // Minecraft
     minecraft(libs.minecraft)
@@ -72,7 +74,6 @@ tasks.processResources {
             "version" to libs.versions.project.get(),
             "minecraft_version" to libs.versions.minecraft.get(),
             "loader_version" to libs.versions.fabric.loader.get(),
-            "kotlin_loader_version" to libs.versions.fabric.language.kotlin.get(),
             "fabric_permissions_api_version" to libs.versions.fabric.permissions.api.get()
         )
     }
