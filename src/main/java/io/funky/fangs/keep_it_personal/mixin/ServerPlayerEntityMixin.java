@@ -6,13 +6,13 @@ import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
 import jakarta.annotation.Nonnull;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -32,11 +32,18 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSet;
 import static java.util.function.Predicate.not;
+import static net.minecraft.entity.player.PlayerInventory.MAIN_SIZE;
+import static net.minecraft.entity.player.PlayerInventory.OFF_HAND_SLOT;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity implements DeathPreferenceContainer {
     @Unique
     private static final String DEATH_PREFERENCES_KEY = "death_preferences";
+
+    @Unique
+    private static final Set<EquipmentSlot> ARMOR_SLOTS = unmodifiableSet(
+            EnumSet.of(EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD)
+    );
 
     @Unique
     private static EnumSet<DeathPreference> getInitialDeathPreferences() {
@@ -79,28 +86,31 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
             final Stream.Builder<ItemStack> itemsToDrop = Stream.builder();
 
             if (!deathPreferences.contains(DeathPreference.ARMOR)) {
-                inventory.armor.forEach(itemsToDrop::add);
-                inventory.armor.clear();
+                for (var slot : ARMOR_SLOTS) {
+                    final var slotId = slot.getOffsetEntitySlotId(MAIN_SIZE);
+                    itemsToDrop.add(inventory.getStack(slotId));
+                    inventory.removeStack(slotId);
+                }
             }
 
             if (!deathPreferences.contains(DeathPreference.OFFHAND)) {
-                inventory.offHand.forEach(itemsToDrop::add);
-                inventory.offHand.clear();
+                itemsToDrop.add(inventory.getStack(OFF_HAND_SLOT));
+                inventory.removeStack(OFF_HAND_SLOT);
             }
 
             if (!deathPreferences.contains(DeathPreference.HOTBAR)) {
                 for (int i = 0; i < PlayerInventory.getHotbarSize(); ++i) {
                     final var itemStack = inventory.getStack(i);
                     itemsToDrop.add(itemStack);
-                    inventory.setStack(i, ItemStack.EMPTY);
+                    inventory.removeStack(i);
                 }
             }
 
             if (!deathPreferences.contains(DeathPreference.INVENTORY)) {
-                for (int i = PlayerInventory.HOTBAR_SIZE; i < inventory.main.size(); ++i) {
+                for (int i = PlayerInventory.HOTBAR_SIZE; i < MAIN_SIZE; ++i) {
                     final var itemStack = inventory.getStack(i);
                     itemsToDrop.add(itemStack);
-                    inventory.setStack(i, ItemStack.EMPTY);
+                    inventory.removeStack(i);
                 }
             }
 
@@ -131,27 +141,26 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
             final var inventory = getInventory();
 
             if (deathPreferences.contains(DeathPreference.OFFHAND)) {
-                for (int i = 0; i < inventory.offHand.size(); ++i) {
-                    inventory.offHand.set(i, oldInventory.offHand.get(i));
-                }
+                inventory.setStack(OFF_HAND_SLOT, oldInventory.getStack(OFF_HAND_SLOT));
             }
 
             if (deathPreferences.contains(DeathPreference.ARMOR)) {
-                for (int i = 0; i < inventory.armor.size(); ++i) {
-                    inventory.armor.set(i, oldInventory.armor.get(i));
+                for (var slot : ARMOR_SLOTS) {
+                    final var slotId = slot.getOffsetEntitySlotId(MAIN_SIZE);
+                    inventory.setStack(slotId, oldInventory.getStack(slotId));
                 }
             }
 
             if (deathPreferences.contains(DeathPreference.HOTBAR)) {
                 for (int i = 0; i < PlayerInventory.HOTBAR_SIZE; ++i) {
-                    inventory.main.set(i, oldInventory.main.get(i));
+                    inventory.setStack(i, oldInventory.getStack(i));
                 }
-                inventory.setSelectedSlot(oldInventory.selectedSlot);
+                inventory.setSelectedSlot(oldInventory.getSelectedSlot());
             }
 
             if (deathPreferences.contains(DeathPreference.INVENTORY)) {
-                for (int i = PlayerInventory.HOTBAR_SIZE; i < inventory.main.size(); ++i) {
-                    inventory.main.set(i, oldInventory.main.get(i));
+                for (int i = PlayerInventory.HOTBAR_SIZE; i < MAIN_SIZE; ++i) {
+                    inventory.setStack(i, oldInventory.getStack(i));
                 }
             }
         }
@@ -178,7 +187,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
      */
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     public void afterReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
-        if (nbt.contains(DEATH_PREFERENCES_KEY, NbtElement.INT_ARRAY_TYPE)) {
+        if (nbt.contains(DEATH_PREFERENCES_KEY)) {
             deathPreferences.clear();
 
             final var preferences = KeepItPersonalConfiguration.getInstance().preferences();
@@ -186,7 +195,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
             final var disabled = preferences.disabled();
 
             Stream.concat(
-                    Arrays.stream(nbt.getIntArray(DEATH_PREFERENCES_KEY))
+                    nbt.getIntArray(DEATH_PREFERENCES_KEY)
+                            .stream()
+                            .flatMapToInt(Arrays::stream)
                             .mapToObj(DeathPreference::fromOrdinal)
                             .filter(not(disabled::contains)),
                     enabled.stream()
