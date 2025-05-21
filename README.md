@@ -12,7 +12,7 @@ To install this mod, simply add the JAR to the `mods` directory in the root dire
 
 # Usage
 
-This mod uses a single command, `/keeping`, along with multiple subcommands as outlined below.
+This mod uses a single command, `/kip`, along with multiple subcommands as outlined below.
 
 ## Death Preferences
 
@@ -31,23 +31,23 @@ The following table contains the options a player can choose to keep on death.
 
 ### View All Preferences
 
-To view a list of your current preferences, run `/keeping`.
+To view a list of your current preferences, run `/kip`.
 
 ### View Individual Preference
 
-To view whether you have selected a specific preference, run `/keeping <preference>`.
+To view whether you have selected a specific preference, run `/kip <preference>`.
 
 ### Keep Everything on Death
 
-To keep everything in your inventory on death, run `/keeping everything`.
+To keep everything in your inventory on death, run `/kip everything`.
 
 ### Clear All Preferences
 
-To clear your preferences and drop everything on death, run `/keeping nothing`.
+To clear your preferences and drop everything on death, run `/kip nothing`.
 
 ### Set a Specific Preference
 
-To set a specific preference, run `/keeping <preference> <true | false>`, where `true` indicates that you wish to keep the preferred items on death, and `false` indicates you wish to drop them.
+To set a specific preference, run `/kip <preference> <true | false>`, where `true` indicates that you wish to keep the preferred items on death, and `false` indicates you wish to drop them.
 
 # Configuration
 
@@ -86,10 +86,10 @@ Each command can be controlled with a specific permission. The following table c
 
 |               Permission                | Description                                                 |
 |:---------------------------------------:|:------------------------------------------------------------|
-|       `keep_it_personal.keeping`        | View all the preferences they have selected                 |
-| `keep_it_personal.keeping.<preference>` | View and update a specific preference                       |
-|  `keep_it_personal.keeping.everything`  | Add every available preference to selected preferences      |
-|   `keep_it_personal.keeping.nothing`    | Remove every available preference from selected preferences |
+|       `keep_it_personal.kip`        | View all the preferences they have selected                 |
+| `keep_it_personal.kip.<preference>` | View and update a specific preference                       |
+|  `keep_it_personal.kip.everything`  | Add every available preference to selected preferences      |
+|   `keep_it_personal.kip.nothing`    | Remove every available preference from selected preferences |
 
 
 ## Permission Configuration Properties
