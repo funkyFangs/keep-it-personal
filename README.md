@@ -10,6 +10,11 @@ Keep It Personal is designed to be lightweight and compatible; it's entirely ser
 
 To install this mod, simply add the JAR to the `mods` directory in the root directory of the server.
 
+## Dependencies
+
+The following mods must also be installed on the server in order to work.
+* [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api) (will be made an optional dependency in the next update)
+
 # Usage
 
 This mod uses a single command, `/kip`, along with multiple subcommands as outlined below.
