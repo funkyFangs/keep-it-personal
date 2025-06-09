@@ -10,11 +10,6 @@ Keep It Personal is designed to be lightweight and compatible; it's entirely ser
 
 To install this mod, simply add the JAR to the `mods` directory in the root directory of the server.
 
-## Dependencies
-
-The following mods must also be installed on the server in order to work.
-* [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api) (will be made an optional dependency in the next update)
-
 # Usage
 
 This mod uses a single command, `/kip`, along with multiple subcommands as outlined below.
@@ -87,7 +82,7 @@ By default, no preferences are enabled.
 
 # Permissions
 
-Each command can be controlled with a specific permission. The following table contains the full list of permissions.
+This mod optionally supports [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api) for command permissions. Each command can be controlled with a specific permission. The following table contains the full list of permissions.
 
 |               Permission                | Description                                                 |
 |:---------------------------------------:|:------------------------------------------------------------|
@@ -96,16 +91,18 @@ Each command can be controlled with a specific permission. The following table c
 |  `keep_it_personal.kip.everything`  | Add every available preference to selected preferences      |
 |   `keep_it_personal.kip.nothing`    | Remove every available preference from selected preferences |
 
-
 ## Permission Configuration Properties
 
-Additionally, in your configuration file, you may specify a default permission level to fall back to. For example, to let
-anyone with permission level 1 be able to use this command, you would specify the following in `keep_it_personal.toml`.
+For servers which do not use [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api) or also use OP permission levels, you may specify a default permission level for these commands. This is set as `permissions.permissionLevel` in the configuration file.
+
+For example, to let anyone with permission level 1 be able to use this command, you would specify the following in `keep_it_personal.toml`.
 
 ```toml
 [permissions]
 permissionLevel = 1
 ```
+
+By default, the permission level is `0`. Note that the permission level overrides permissions set in the [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api).
 
 ### Defaults
 
