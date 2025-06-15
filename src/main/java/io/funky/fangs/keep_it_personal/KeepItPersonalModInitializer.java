@@ -3,6 +3,7 @@ package io.funky.fangs.keep_it_personal;
 import io.funky.fangs.keep_it_personal.command.*;
 import io.funky.fangs.keep_it_personal.configuration.KeepItPersonalConfiguration;
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
+import io.funky.fangs.keep_it_personal.exception.KeepItPersonalException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -21,18 +22,17 @@ public class KeepItPersonalModInitializer implements ModInitializer {
         final var preferences = configuration.preferences();
         final var disabled = preferences.disabled();
         final var enabled = preferences.enabled();
-        final var permissions = configuration.permissions();
-        final var permissionLevel = permissions.permissionLevel();
+        final int permissionLevel = configuration.permissions().permissionLevel();
 
         final var hasIntersectingPreferences = Arrays.stream(DeathPreference.values())
                 .anyMatch(deathPreference -> enabled.contains(deathPreference)
                         && disabled.contains(deathPreference));
 
         if (hasIntersectingPreferences) {
-            throw new IllegalStateException("Overlapping preferences in disabled and enabled preferences are not permitted");
+            throw new KeepItPersonalException("Overlapping preferences in disabled and enabled preferences are not permitted");
         }
         else if (permissionLevel < 0 || permissionLevel > 4) {
-            throw new IllegalStateException("Permission level must be between 0 and 4");
+            throw new KeepItPersonalException("Permission level must be between 0 and 4");
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
