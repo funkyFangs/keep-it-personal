@@ -16,4 +16,14 @@ public record PreferencesConfiguration(
     public PreferencesConfiguration() {
         this(DEFAULT_DISABLED, DEFAULT_ENABLED);
     }
+
+    @Override
+    public Set<DeathPreference> enabled() {
+        return enabled == null ? DEFAULT_ENABLED : enabled;
+    }
+
+    @Override
+    public Set<DeathPreference> disabled() {
+        return disabled == null ? DEFAULT_DISABLED : disabled;
+    }
 }

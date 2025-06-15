@@ -8,4 +8,9 @@ public record PermissionsConfiguration(
     public PermissionsConfiguration() {
         this(DEFAULT_PERMISSION_LEVEL);
     }
+
+    @Override
+    public Integer permissionLevel() {
+        return permissionLevel == null ? DEFAULT_PERMISSION_LEVEL : 0;
+    }
 }
