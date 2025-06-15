@@ -4,15 +4,15 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 
 import static io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer.MOD_ID;
+import static net.minecraft.text.Text.translatable;
 
 public abstract class KeepItPersonalCommand implements Command<ServerCommandSource> {
     public static final int SINGLE_ERROR = -1;
     public static final String NAME = "kip";
     public static final String PERMISSION = MOD_ID + '.' + NAME;
-    private static final String ERROR_RESPONSE = "This command can only be used by a player";
+    private static final String INVALID_COMMAND_SENDER = "keep-it-personal.message.invalid-command-sender";
 
     @Override
     public int run(CommandContext<ServerCommandSource> context) {
@@ -24,7 +24,7 @@ public abstract class KeepItPersonalCommand implements Command<ServerCommandSour
             return result == null ? SINGLE_ERROR : result;
         }
         else {
-            source.sendError(Text.literal(ERROR_RESPONSE));
+            source.sendError(translatable(INVALID_COMMAND_SENDER));
             return SINGLE_ERROR;
         }
     }
