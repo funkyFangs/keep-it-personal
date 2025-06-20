@@ -3,7 +3,7 @@
   "id": "keep-it-personal",
   "version": "${version}",
   "name": "Keep It Personal",
-  "description": "This is a Fabric server mod which enables customizable keep-inventory rules on a per-player basis.",
+  "description": "This is a Fabric server mod which provides customizable keep-inventory rules on a per-player basis.",
   "authors": [
     {
       "name": "Harper Price",
@@ -49,7 +49,9 @@
   "depends": {
     "fabricloader": "~${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
     "fabric-permissions-api-v0": "~${fabric_permissions_api_version}"
   }
 }
