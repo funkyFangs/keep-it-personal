@@ -13,12 +13,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,8 +53,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
         return enabled.isEmpty() ? EnumSet.noneOf(DeathPreference.class) : EnumSet.copyOf(enabled);
     }
 
-    private ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
-        super(world, pos, yaw, gameProfile);
+    public ServerPlayerEntityMixin(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions) {
+        super(world, profile);
     }
 
     @Shadow
@@ -60,10 +62,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
     public abstract ItemEntity dropItem(ItemStack stack, boolean throwRandomly, boolean retainOwnership);
 
     @Shadow
-    public abstract ServerWorld getServerWorld();
+    public abstract boolean damage(ServerWorld world, DamageSource source, float amount);
 
     @Shadow
-    public abstract boolean damage(ServerWorld world, DamageSource source, float amount);
+    public abstract ServerWorld getWorld();
 
     @Unique
     public final EnumSet<DeathPreference> deathPreferences = getInitialDeathPreferences();
@@ -179,44 +181,43 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
      */
     @Unique
     private boolean shouldDropInventory() {
-        return !(getServerWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || isSpectator());
+        return !(getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || isSpectator());
     }
 
     /**
      * Reads the {@link #deathPreferences} from the {@link NbtCompound}
      */
-    @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-    public void afterReadCustomDataFromNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
-        if (nbt.contains(DEATH_PREFERENCES_KEY)) {
-            deathPreferences.clear();
+    @Inject(method = "readCustomData", at = @At("TAIL"))
+    protected void afterReadCustomData(ReadView view, CallbackInfo callbackInfo) {
+        view.getOptionalIntArray(DEATH_PREFERENCES_KEY)
+                .ifPresent(ordinals -> {
+                    deathPreferences.clear();
 
-            final var preferences = KeepItPersonalConfiguration.getInstance().preferences();
-            final var enabled = preferences.enabled();
-            final var disabled = preferences.disabled();
+                    final var preferences = KeepItPersonalConfiguration.getInstance().preferences();
+                    final var enabled = preferences.enabled();
+                    final var disabled = preferences.disabled();
 
-            Stream.concat(
-                    nbt.getIntArray(DEATH_PREFERENCES_KEY)
-                            .stream()
-                            .flatMapToInt(Arrays::stream)
-                            .mapToObj(DeathPreference::fromOrdinal)
-                            .filter(not(disabled::contains)),
-                    enabled.stream()
-            )
-                    .distinct()
-                    .forEach(deathPreferences::add);
-        }
+                    Stream.concat(
+                            Arrays.stream(ordinals)
+                                    .mapToObj(DeathPreference::fromOrdinal)
+                                    .filter(not(disabled::contains)),
+                                    enabled.stream()
+                            )
+                            .distinct()
+                            .forEach(deathPreferences::add);
+                });
     }
 
     /**
      * Writes the {@link #deathPreferences} to the {@link NbtCompound}
      */
-    @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-    public void afterWriteCustomDataToNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
+    @Inject(method = "writeCustomData", at = @At("TAIL"))
+    public void afterWriteCustomData(WriteView view, CallbackInfo callbackInfo) {
         final var preferences = KeepItPersonalConfiguration.getInstance().preferences();
         final var enabled = preferences.enabled();
         final var disabled = preferences.disabled();
 
-        final var preferenceOrdinals = Stream.concat(
+        final var ordinals = Stream.concat(
                 deathPreferences.stream().filter(not(disabled::contains)),
                 enabled.stream()
         )
@@ -224,7 +225,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
                 .mapToInt(DeathPreference::ordinal)
                 .toArray();
 
-        nbt.putIntArray(DEATH_PREFERENCES_KEY, preferenceOrdinals);
+        view.putIntArray(DEATH_PREFERENCES_KEY, ordinals);
     }
 
     @Nonnull
