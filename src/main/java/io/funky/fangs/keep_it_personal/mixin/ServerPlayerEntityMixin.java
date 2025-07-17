@@ -5,13 +5,8 @@ import io.funky.fangs.keep_it_personal.configuration.KeepItPersonalConfiguration
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
 import jakarta.annotation.Nonnull;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
@@ -21,7 +16,6 @@ import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,6 +26,8 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.ARMOR_SLOTS;
+import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.hasCurseOfVanishing;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.function.Predicate.not;
 import static net.minecraft.entity.player.PlayerInventory.MAIN_SIZE;
@@ -43,84 +39,20 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
     private static final String DEATH_PREFERENCES_KEY = "death_preferences";
 
     @Unique
-    private static final Set<EquipmentSlot> ARMOR_SLOTS = unmodifiableSet(
-            EnumSet.of(EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD)
-    );
-
-    @Unique
     private static EnumSet<DeathPreference> getInitialDeathPreferences() {
         final var enabled = KeepItPersonalConfiguration.getInstance().preferences().enabled();
         return enabled.isEmpty() ? EnumSet.noneOf(DeathPreference.class) : EnumSet.copyOf(enabled);
     }
 
-    public ServerPlayerEntityMixin(MinecraftServer server, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions) {
+    public ServerPlayerEntityMixin(MinecraftServer ignoredServer, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions) {
         super(world, profile);
     }
-
-    @Shadow
-    @Nullable
-    public abstract ItemEntity dropItem(ItemStack stack, boolean throwRandomly, boolean retainOwnership);
-
-    @Shadow
-    public abstract boolean damage(ServerWorld world, DamageSource source, float amount);
 
     @Shadow
     public abstract ServerWorld getWorld();
 
     @Unique
     public final EnumSet<DeathPreference> deathPreferences = getInitialDeathPreferences();
-
-    /**
-     * This method overrides the default behavior for dropping the {@link ServerPlayerEntity}'s {@link PlayerInventory}.
-     * Items in the inventory without {@link Enchantments#VANISHING_CURSE} are dropped based on the player's selected
-     * {@link DeathPreference}s. This method will not modify the inventory if {@link GameRules#KEEP_INVENTORY} is
-     * enabled.
-     */
-    @Override
-    public void dropInventory(ServerWorld world) {
-        if (!world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY)) {
-            if (!deathPreferences.contains(DeathPreference.CURSED)) {
-                this.vanishCursedItems();
-            }
-
-            final var inventory = getInventory();
-
-            final Stream.Builder<ItemStack> itemsToDrop = Stream.builder();
-
-            if (!deathPreferences.contains(DeathPreference.ARMOR)) {
-                for (var slot : ARMOR_SLOTS) {
-                    final var slotId = slot.getOffsetEntitySlotId(MAIN_SIZE);
-                    itemsToDrop.add(inventory.getStack(slotId));
-                    inventory.removeStack(slotId);
-                }
-            }
-
-            if (!deathPreferences.contains(DeathPreference.OFFHAND)) {
-                itemsToDrop.add(inventory.getStack(OFF_HAND_SLOT));
-                inventory.removeStack(OFF_HAND_SLOT);
-            }
-
-            if (!deathPreferences.contains(DeathPreference.HOTBAR)) {
-                for (int i = 0; i < PlayerInventory.getHotbarSize(); ++i) {
-                    final var itemStack = inventory.getStack(i);
-                    itemsToDrop.add(itemStack);
-                    inventory.removeStack(i);
-                }
-            }
-
-            if (!deathPreferences.contains(DeathPreference.INVENTORY)) {
-                for (int i = PlayerInventory.HOTBAR_SIZE; i < MAIN_SIZE; ++i) {
-                    final var itemStack = inventory.getStack(i);
-                    itemsToDrop.add(itemStack);
-                    inventory.removeStack(i);
-                }
-            }
-
-            itemsToDrop.build()
-                    .filter(not(ItemStack::isEmpty))
-                    .forEach(item -> dropItem(item, true, false));
-        }
-    }
 
     /**
      * This method copies over the inventory and experience from the old {@link ServerPlayerEntity} based on the
@@ -165,15 +97,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
                     inventory.setStack(i, oldInventory.getStack(i));
                 }
             }
-        }
-    }
 
-    /**
-     * @return true if keeping {@link DeathPreference#EXPERIENCE} or if experience dropping was already disabled
-     */
-    @Override
-    public boolean isExperienceDroppingDisabled() {
-        return deathPreferences.contains(DeathPreference.EXPERIENCE) || super.isExperienceDroppingDisabled();
+            if (deathPreferences.contains(DeathPreference.CURSED)) {
+                for (int i = 0; i < oldInventory.size(); ++i) {
+                    final var itemStack = oldInventory.getStack(i);
+                    if (hasCurseOfVanishing(itemStack)) {
+                        inventory.setStack(i, itemStack);
+                    }
+                }
+            }
+        }
     }
 
     /**
