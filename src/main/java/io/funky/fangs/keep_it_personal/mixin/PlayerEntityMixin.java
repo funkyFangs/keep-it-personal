@@ -10,17 +10,11 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.stream.Stream;
-
-import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.ARMOR_SLOTS;
-import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.hasCurseOfVanishing;
-import static net.minecraft.entity.player.PlayerInventory.MAIN_SIZE;
-import static net.minecraft.entity.player.PlayerInventory.OFF_HAND_SLOT;
+import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.*;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -43,53 +37,24 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     )
     public void dropInventoryBasedOnPreferences(PlayerInventory inventory, Operation<Void> original) {
         if (this instanceof DeathPreferenceContainer container) {
-            final Stream.Builder<ItemStack> itemsToDrop = Stream.builder();
-            final boolean keepCursedItems = container.hasDeathPreference(DeathPreference.CURSED);
+            final var deathPreferences = container.getDeathPreferences();
+            final var itemPredicates = getItemPredicates(deathPreferences);
 
-            if (!container.hasDeathPreference(DeathPreference.ARMOR)) {
-                for (var slot : ARMOR_SLOTS) {
-                    final var slotId = slot.getOffsetEntitySlotId(MAIN_SIZE);
+            // If there are no death preferences affecting which items are dropped, fall back to original method
+            if (!itemPredicates.isEmpty()) {
+                for (int i = 0; i < inventory.size(); i += 1) {
+                    final int slotId = i;
                     final var itemStack = inventory.getStack(slotId);
 
-                    if (!(itemStack.isEmpty() || keepCursedItems && hasCurseOfVanishing(itemStack))) {
-                        itemsToDrop.add(inventory.getStack(slotId));
+                    if (!itemStack.isEmpty() && itemPredicates.stream().noneMatch(predicate -> predicate.test(itemStack, slotId))) {
                         inventory.removeStack(slotId);
+                        dropItem(itemStack, true, false);
                     }
                 }
+                return;
             }
-
-            if (!container.hasDeathPreference(DeathPreference.OFFHAND)) {
-                final var itemStack = inventory.getStack(OFF_HAND_SLOT);
-                if (!(itemStack.isEmpty() || keepCursedItems && hasCurseOfVanishing(itemStack))) {
-                    itemsToDrop.add(itemStack);
-                    inventory.removeStack(OFF_HAND_SLOT);
-                }
-            }
-
-            if (!container.hasDeathPreference(DeathPreference.HOTBAR)) {
-                for (int i = 0; i < PlayerInventory.getHotbarSize(); ++i) {
-                    final var itemStack = inventory.getStack(i);
-                    if (!(itemStack.isEmpty() || keepCursedItems && hasCurseOfVanishing(itemStack))) {
-                        itemsToDrop.add(itemStack);
-                        inventory.removeStack(i);
-                    }
-                }
-            }
-
-            if (!container.hasDeathPreference(DeathPreference.INVENTORY)) {
-                for (int i = PlayerInventory.HOTBAR_SIZE; i < MAIN_SIZE; ++i) {
-                    final var itemStack = inventory.getStack(i);
-                    if (!(itemStack.isEmpty() || keepCursedItems && hasCurseOfVanishing(itemStack))) {
-                        itemsToDrop.add(itemStack);
-                        inventory.removeStack(i);
-                    }
-                }
-            }
-
-            itemsToDrop.build().forEach(item -> dropItem(item, true, false));
         }
-        else {
-            original.call(inventory);
-        }
+
+        original.call(inventory);
     }
 }

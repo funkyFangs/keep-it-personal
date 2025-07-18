@@ -6,7 +6,6 @@ import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
 import jakarta.annotation.Nonnull;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
@@ -26,12 +25,9 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.ARMOR_SLOTS;
-import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.hasCurseOfVanishing;
+import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.*;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.function.Predicate.not;
-import static net.minecraft.entity.player.PlayerInventory.MAIN_SIZE;
-import static net.minecraft.entity.player.PlayerInventory.OFF_HAND_SLOT;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity implements DeathPreferenceContainer {
@@ -73,38 +69,20 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
 
             final var oldInventory = oldPlayer.getInventory();
             final var inventory = getInventory();
+            final var itemPredicates = getItemPredicates(deathPreferences);
 
-            if (deathPreferences.contains(DeathPreference.OFFHAND)) {
-                inventory.setStack(OFF_HAND_SLOT, oldInventory.getStack(OFF_HAND_SLOT));
-            }
-
-            if (deathPreferences.contains(DeathPreference.ARMOR)) {
-                for (var slot : ARMOR_SLOTS) {
-                    final var slotId = slot.getOffsetEntitySlotId(MAIN_SIZE);
-                    inventory.setStack(slotId, oldInventory.getStack(slotId));
+            if (!itemPredicates.isEmpty()) {
+                for (int i = 0; i < oldInventory.size(); i += 1) {
+                    final int slotId = i;
+                    final var itemStack = oldInventory.getStack(slotId);
+                    if (itemPredicates.stream().anyMatch(predicate -> predicate.test(itemStack, slotId))) {
+                        inventory.setStack(slotId, itemStack);
+                    }
                 }
             }
 
             if (deathPreferences.contains(DeathPreference.HOTBAR)) {
-                for (int i = 0; i < PlayerInventory.HOTBAR_SIZE; ++i) {
-                    inventory.setStack(i, oldInventory.getStack(i));
-                }
                 inventory.setSelectedSlot(oldInventory.getSelectedSlot());
-            }
-
-            if (deathPreferences.contains(DeathPreference.INVENTORY)) {
-                for (int i = PlayerInventory.HOTBAR_SIZE; i < MAIN_SIZE; ++i) {
-                    inventory.setStack(i, oldInventory.getStack(i));
-                }
-            }
-
-            if (deathPreferences.contains(DeathPreference.CURSED)) {
-                for (int i = 0; i < oldInventory.size(); ++i) {
-                    final var itemStack = oldInventory.getStack(i);
-                    if (hasCurseOfVanishing(itemStack)) {
-                        inventory.setStack(i, itemStack);
-                    }
-                }
             }
         }
     }
