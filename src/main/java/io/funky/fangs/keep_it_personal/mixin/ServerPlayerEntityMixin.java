@@ -79,10 +79,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
                         inventory.setStack(slotId, itemStack);
                     }
                 }
-            }
 
-            if (deathPreferences.contains(DeathPreference.HOTBAR)) {
-                inventory.setSelectedSlot(oldInventory.getSelectedSlot());
+                if (deathPreferences.contains(DeathPreference.HOTBAR)) {
+                    inventory.setSelectedSlot(oldInventory.getSelectedSlot());
+                }
             }
         }
     }
