@@ -127,7 +127,6 @@ base {
 }
 
 loom {
-    serverOnlyMinecraftJar()
     splitEnvironmentSourceSets()
 
     mods {
