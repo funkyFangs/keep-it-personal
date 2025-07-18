@@ -19,7 +19,7 @@
     "homepage": "https://modrinth.com/project/keep-it-personal"
   },
   "license": "CC-BY-SA-4.0",
-  "environment": "server",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer"
