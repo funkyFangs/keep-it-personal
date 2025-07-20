@@ -2,13 +2,13 @@
 
 # Fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-api = '0.128.1+1.21.7'
+fabric-api = '0.129.0+1.21.8'
 fabric-loader = '0.16.14'
-fabric-loom = '1.10.5'
+fabric-loom = '1.11.4'
 fabric-permissions-api = '0.4.0'
 
 # Jackson
-jackson = '2.19.1'
+jackson = '2.19.2'
 
 # Jakarta
 jakarta = '3.0.0'
@@ -20,13 +20,13 @@ java = '21'
 kotlin = '2.2.0'
 
 # Minecraft
-minecraft = '1.21.7'
+minecraft = '1.21.8'
 
 # Project
 project = '1.0.6-SNAPSHOT'
 
 # Yarn
-yarn = '1.21.7+build.1'
+yarn = '1.21.8+build.1'
 
 [libraries]
 
