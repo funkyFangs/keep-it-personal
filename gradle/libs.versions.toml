@@ -2,9 +2,9 @@
 
 # Fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-api = '0.129.0+1.21.8'
-fabric-loader = '0.16.14'
-fabric-loom = '1.11.4'
+fabric-api = '0.133.0+1.21.8'
+fabric-loader = '0.17.2'
+fabric-loom = '1.11.7'
 fabric-permissions-api = '0.4.0'
 
 # Jackson
@@ -17,7 +17,7 @@ jakarta = '3.0.0'
 java = '21'
 
 # Kotlin
-kotlin = '2.2.0'
+kotlin = '2.2.10'
 
 # Minecraft
 minecraft = '1.21.8'
