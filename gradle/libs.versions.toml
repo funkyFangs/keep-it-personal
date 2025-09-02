@@ -23,7 +23,7 @@ kotlin = '2.2.10'
 minecraft = '1.21.8'
 
 # Project
-project = '1.0.7-SNAPSHOT'
+project = '1.0.7'
 
 # Yarn
 yarn = '1.21.8+build.1'
