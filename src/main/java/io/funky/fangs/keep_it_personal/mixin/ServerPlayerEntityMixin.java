@@ -45,7 +45,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
     }
 
     @Shadow
-    public abstract ServerWorld getWorld();
+    public abstract ServerWorld getEntityWorld();
 
     @Unique
     public final EnumSet<DeathPreference> deathPreferences = getInitialDeathPreferences();
@@ -92,7 +92,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
      */
     @Unique
     private boolean shouldDropInventory() {
-        return !(getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || isSpectator());
+        return !(getEntityWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || isSpectator());
     }
 
     /**
