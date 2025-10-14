@@ -2,13 +2,13 @@
 
 # Fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-api = '0.133.0+1.21.8'
-fabric-loader = '0.17.2'
-fabric-loom = '1.11.7'
+fabric-api = '0.134.0+1.21.9'
+fabric-loader = '0.17.3'
+fabric-loom = '1.11.8'
 fabric-permissions-api = '0.4.0'
 
 # Jackson
-jackson = '2.19.2'
+jackson = '2.20.0'
 
 # Jakarta
 jakarta = '3.0.0'
@@ -17,16 +17,16 @@ jakarta = '3.0.0'
 java = '21'
 
 # Kotlin
-kotlin = '2.2.10'
+kotlin = '2.2.20'
 
 # Minecraft
-minecraft = '1.21.8'
+minecraft = '1.21.9'
 
 # Project
 project = '1.0.8-SNAPSHOT'
 
 # Yarn
-yarn = '1.21.8+build.1'
+yarn = '1.21.9+build.1'
 
 [libraries]
 
@@ -36,7 +36,7 @@ fabric-loader = {group = 'net.fabricmc', name = 'fabric-loader', version.ref = '
 fabric-permissions-api = {group = 'me.lucko', name = 'fabric-permissions-api', version.ref = 'fabric-permissions-api'}
 
 # Jackson
-jackson-annotations = {group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version.ref = 'jackson'}
+jackson-annotations = {group = 'com.fasterxml.jackson.core', name = 'jackson-annotations', version = '2.20'}
 jackson-bom = {group = 'com.fasterxml.jackson', name = 'jackson-bom', version.ref = 'jackson'}
 jackson-core = {group = 'com.fasterxml.jackson.core', name = 'jackson-core', version.ref = 'jackson'}
 jackson-databind = {group = 'com.fasterxml.jackson.core', name = 'jackson-databind', version.ref = 'jackson'}
