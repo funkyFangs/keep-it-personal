@@ -1,17 +1,16 @@
 package io.funky.fangs.keep_it_personal.configuration;
 
-import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.exception.KeepItPersonalException;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import tools.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
 
+import static io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer.LOGGER;
 import static io.funky.fangs.keep_it_personal.KeepItPersonalModInitializer.MOD_ID;
 import static io.funky.fangs.keep_it_personal.configuration.PermissionsConfiguration.DEFAULT_PERMISSION_LEVEL;
 import static io.funky.fangs.keep_it_personal.configuration.PreferencesConfiguration.DEFAULT_DISABLED;
@@ -22,7 +21,6 @@ public record KeepItPersonalConfiguration(
         PreferencesConfiguration preferences,
         PermissionsConfiguration permissions
 ) {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeepItPersonalConfiguration.class);
     private static final String CONFIGURATION_ERROR_MESSAGE = "Unable to load configuration for " + MOD_ID;
     private static final File CONFIGURATION_FILE = FabricLoader.getInstance()
             .getConfigDir()
@@ -49,7 +47,7 @@ public record KeepItPersonalConfiguration(
 
     private static KeepItPersonalConfiguration INSTANCE;
 
-    public KeepItPersonalConfiguration() {
+    private KeepItPersonalConfiguration() {
         this(new PreferencesConfiguration(), new PermissionsConfiguration());
     }
 
@@ -57,13 +55,20 @@ public record KeepItPersonalConfiguration(
         try {
             if (INSTANCE == null) {
                 if (!CONFIGURATION_FILE.exists()) {
-                    LOGGER.atDebug().log("Creating new configuration file: {}", CONFIGURATION_FILE.getName());
+                    LOGGER.atInfo().log("Creating new configuration file: {}", CONFIGURATION_FILE.getName());
+
                     if (CONFIGURATION_FILE.createNewFile()) {
                         try (PrintWriter writer = new PrintWriter(CONFIGURATION_FILE)) {
                             writer.println(DEFAULT_CONFIGURATION_FILE);
                         }
                     }
+
+                    LOGGER.atInfo().log("Configuration file successfully created");
                 }
+                else {
+                    LOGGER.atInfo().log("Loading configuration from existing file...");
+                }
+
                 INSTANCE = new TomlMapper().readerFor(KeepItPersonalConfiguration.class).readValue(CONFIGURATION_FILE);
             }
 

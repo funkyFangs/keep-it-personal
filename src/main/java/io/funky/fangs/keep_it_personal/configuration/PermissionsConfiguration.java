@@ -11,6 +11,6 @@ public record PermissionsConfiguration(
 
     @Override
     public Integer permissionLevel() {
-        return permissionLevel == null ? DEFAULT_PERMISSION_LEVEL : 0;
+        return permissionLevel == null ? DEFAULT_PERMISSION_LEVEL : permissionLevel;
     }
 }
