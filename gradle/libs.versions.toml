@@ -27,7 +27,7 @@ luckperms = 'v5.5.17-fabric'
 minecraft = '1.21.10'
 
 # Project
-project = '1.21.10+build.5'
+project = '1.21.10+build.4'
 
 # Yarn
 yarn = '1.21.10+build.3'
