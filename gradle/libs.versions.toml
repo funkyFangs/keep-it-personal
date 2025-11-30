@@ -20,6 +20,9 @@ java = '21'
 # Kotlin
 kotlin = '2.2.20'
 
+# LuckPerms
+luckperms = 'v5.5.17-fabric'
+
 # Minecraft
 minecraft = '1.21.10'
 
