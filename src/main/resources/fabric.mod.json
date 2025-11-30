@@ -44,14 +44,17 @@
     }
   ],
   "mixins": [
-     "keep_it_personal.mixins.json"
+    "keep_it_personal.mixins.json"
   ],
   "depends": {
     "fabricloader": "~${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "~${minecraft_version}"
   },
   "suggests": {
-    "fabric-permissions-api-v0": "~${fabric_permissions_api_version}"
+    "luckperms": "~${luckperms_version}"
+  },
+  "conflicts": {
+    "individualkeepinv": "*"
   }
 }

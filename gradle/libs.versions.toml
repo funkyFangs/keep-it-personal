@@ -3,12 +3,12 @@
 # Fabric
 # check these on https://modmuss50.me/fabric.html
 fabric-api = '0.135.0+1.21.10'
-fabric-loader = '0.17.3'
-fabric-loom = '1.11.8'
+fabric-loader = '0.18.1'
+fabric-loom = '1.13.6'
 fabric-permissions-api = '0.5.0'
 
 # Jackson
-jackson = '3.0.0'
+jackson = '3.0.3'
 jackson-annotations = '2.20'
 
 # Jakarta
@@ -20,6 +20,9 @@ java = '21'
 # Kotlin
 kotlin = '2.2.20'
 
+# LuckPerms
+luckperms = 'v5.5.17-fabric'
+
 # Minecraft
 minecraft = '1.21.10'
 
@@ -27,7 +30,7 @@ minecraft = '1.21.10'
 project = '1.21.10+build.4'
 
 # Yarn
-yarn = '1.21.10+build.2'
+yarn = '1.21.10+build.3'
 
 [libraries]
 

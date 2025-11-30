@@ -74,7 +74,8 @@ tasks.processResources {
             "version" to libs.versions.project.get(),
             "minecraft_version" to libs.versions.minecraft.get(),
             "loader_version" to libs.versions.fabric.loader.get(),
-            "fabric_permissions_api_version" to libs.versions.fabric.permissions.api.get()
+            "fabric_permissions_api_version" to libs.versions.fabric.permissions.api.get(),
+            "luckperms_version" to libs.versions.luckperms.get()
         )
     }
 }
