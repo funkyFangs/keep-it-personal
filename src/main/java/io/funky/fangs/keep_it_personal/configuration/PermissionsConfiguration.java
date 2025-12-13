@@ -1,16 +1,18 @@
 package io.funky.fangs.keep_it_personal.configuration;
 
+import net.minecraft.command.permission.PermissionLevel;
+
 public record PermissionsConfiguration(
-        Integer permissionLevel
+        PermissionLevel permissionLevel
 ) {
-    public static final int DEFAULT_PERMISSION_LEVEL = 0;
+    public static final PermissionLevel DEFAULT_PERMISSION_LEVEL = PermissionLevel.ALL;
 
     public PermissionsConfiguration() {
         this(DEFAULT_PERMISSION_LEVEL);
     }
 
     @Override
-    public Integer permissionLevel() {
+    public PermissionLevel permissionLevel() {
         return permissionLevel == null ? DEFAULT_PERMISSION_LEVEL : permissionLevel;
     }
 }

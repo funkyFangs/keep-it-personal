@@ -25,7 +25,7 @@ public class KeepItPersonalModInitializer implements ModInitializer {
         final var preferences = configuration.preferences();
         final var disabled = preferences.disabled();
         final var enabled = preferences.enabled();
-        final int permissionLevel = configuration.permissions().permissionLevel();
+        final var permissionLevel = configuration.permissions().permissionLevel();
 
         final var hasIntersectingPreferences = Arrays.stream(DeathPreference.values())
                 .anyMatch(deathPreference -> enabled.contains(deathPreference)
@@ -33,9 +33,6 @@ public class KeepItPersonalModInitializer implements ModInitializer {
 
         if (hasIntersectingPreferences) {
             throw new KeepItPersonalException("Overlapping preferences in disabled and enabled preferences are not permitted");
-        }
-        else if (permissionLevel < 0 || permissionLevel > 4) {
-            throw new KeepItPersonalException("Permission level must be between 0 and 4");
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {

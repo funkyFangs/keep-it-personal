@@ -2,7 +2,10 @@ package io.funky.fangs.keep_it_personal.configuration;
 
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.exception.KeepItPersonalException;
+import io.funky.fangs.keep_it_personal.serialization.PermissionLevelDeserializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.command.permission.PermissionLevel;
+import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.dataformat.toml.TomlMapper;
 
 import java.io.File;
@@ -32,11 +35,11 @@ public record KeepItPersonalConfiguration(
             disabled = [%s]
             
             [permissions]
-            permissionLevel = %d
+            permissionLevel = '%s'
             """.stripIndent().trim().formatted(
                     toString(DEFAULT_ENABLED),
                     toString(DEFAULT_DISABLED),
-                    DEFAULT_PERMISSION_LEVEL
+                    DEFAULT_PERMISSION_LEVEL.asString()
             );
 
     private static String toString(Set<DeathPreference> preferences) {
@@ -69,7 +72,14 @@ public record KeepItPersonalConfiguration(
                     LOGGER.atInfo().log("Loading configuration from existing file...");
                 }
 
-                INSTANCE = new TomlMapper().readerFor(KeepItPersonalConfiguration.class).readValue(CONFIGURATION_FILE);
+                final var minecraftModule = new SimpleModule();
+                minecraftModule.addDeserializer(PermissionLevel.class, new PermissionLevelDeserializer());
+
+                INSTANCE = TomlMapper.builder()
+                        .addModule(minecraftModule)
+                        .build()
+                        .readerFor(KeepItPersonalConfiguration.class)
+                        .readValue(CONFIGURATION_FILE);
             }
 
             return INSTANCE;
