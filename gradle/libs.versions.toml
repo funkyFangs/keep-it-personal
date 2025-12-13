@@ -24,7 +24,7 @@ kotlin = '2.2.20'
 minecraft = '1.21.11'
 
 # Project
-project = 'development'
+project = '1.21.11+build.1'
 
 # Yarn
 yarn = '1.21.11+build.3'
