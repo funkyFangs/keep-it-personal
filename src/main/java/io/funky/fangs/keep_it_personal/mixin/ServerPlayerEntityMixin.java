@@ -14,7 +14,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.world.GameMode;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -92,7 +92,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
      */
     @Unique
     private boolean shouldDropInventory() {
-        return !(getEntityWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY) || isSpectator());
+        return !(getEntityWorld().getGameRules().getValue(GameRules.KEEP_INVENTORY) || isSpectator());
     }
 
     /**
