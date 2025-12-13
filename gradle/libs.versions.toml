@@ -4,7 +4,7 @@
 # check these on https://modmuss50.me/fabric.html
 fabric-api = '0.139.5+1.21.11'
 fabric-loader = '0.18.2'
-fabric-loom = '1.13-SNAPSHOT'
+fabric-loom = '1.13.6'
 fabric-permissions-api = '0.6.1'
 
 # Jackson
