@@ -95,14 +95,24 @@ This mod optionally supports [fabric-permissions-api](https://modrinth.com/mod/f
 
 For servers which do not use [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api) or also use OP permission levels, you may specify a default permission level for these commands. This is set as `permissions.permissionLevel` in the configuration file.
 
-For example, to let anyone with permission level 1 be able to use this command, you would specify the following in `keep_it_personal.toml`.
+The permission level can be either a numeric or text value, with text being the preferred option.
+
+|     Name     |  Text Value   | Numeric Value |
+|:------------:|:-------------:|:-------------:|
+|     All      |     `all`     |       0       |
+|  Moderators  | `moderators`  |       1       |
+| Gamemasters  | `gamemasters` |       2       |
+|    Admins    |   `admins`    |       3       |
+|    Owners    |   `owners`    |       4       |
+
+For example, to let players with the `moderators` permission level or above be able to use this command, you would specify the following in `keep_it_personal.toml`.
 
 ```toml
 [permissions]
-permissionLevel = 1
+permissionLevel = 'moderators'
 ```
 
-By default, the permission level is `0`. Note that the permission level overrides permissions set in the [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api).
+By default, the permission level is `all`. Note that the permission level overrides permissions set in the [fabric-permissions-api](https://modrinth.com/mod/fabric-permissions-api).
 
 ### Defaults
 
