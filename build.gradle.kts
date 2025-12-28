@@ -15,6 +15,8 @@ plugins {
     id("maven-publish")
 }
 
+val version: String by properties
+
 /*----------------*\
  |  Repositories  |
 \*----------------*/
@@ -71,7 +73,7 @@ tasks.processResources {
 
     filesMatching("fabric.mod.json") {
         expand(
-            "version" to libs.versions.project.get(),
+            "version" to version,
             "minecraft_version" to libs.versions.minecraft.get(),
             "loader_version" to libs.versions.fabric.loader.get(),
             "fabric_permissions_api_version" to libs.versions.fabric.permissions.api.get()
@@ -119,7 +121,6 @@ tasks.jar {
  |  Artifact  |
 \*------------*/
 
-version = libs.versions.project.get()
 val projectName: String by project
 
 base {
