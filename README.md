@@ -118,3 +118,7 @@ By default, the permission level is `all`. Note that the permission level overri
 
 The default permission level is 0 which is given to every player. If you wish to control permissions with a permission
 manager, you should update the permission level accordingly.
+
+# External Compatibility
+
+Currently, support for other mods which extend the player inventory is unknown but likely unsupported. Support for [Trinkets](https://modrinth.com/mod/trinkets) is currently in progress, however, and other mods may be supported in the future.
