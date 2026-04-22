@@ -17,6 +17,8 @@ plugins {
 
 val version: String by properties
 
+loom.log4jConfigs.from("log4j-dev.xml")
+
 /*----------------*\
  |  Repositories  |
 \*----------------*/
@@ -35,9 +37,9 @@ repositories {
 
 dependencies {
     // Fabric
-    modImplementation(libs.fabric.api)
-    modImplementation(libs.fabric.loader)
-    modImplementation(libs.fabric.permissions.api)
+    implementation(libs.fabric.api)
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.permissions.api)
 
     // Jackson
     implementation(libs.jackson.dataformat.toml)
@@ -47,9 +49,6 @@ dependencies {
 
     // Minecraft
     minecraft(libs.minecraft)
-
-    // Yarn
-    mappings("${libs.yarn.get()}:v2")
 
     // Included Dependencies
     for (dependency in libs.bundles.included.get()) {

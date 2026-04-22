@@ -2,29 +2,26 @@
 
 # Fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-api = '0.139.5+1.21.11'
-fabric-loader = '0.18.2'
-fabric-loom = '1.13.6'
-fabric-permissions-api = '0.6.1'
+fabric-api = '0.144.4+26.1'
+fabric-loader = '0.18.5'
+fabric-loom = '1.15.5'
+fabric-permissions-api = '0.7.0'
 
 # Jackson
-jackson = '3.0.0'
-jackson-annotations = '2.20'
+jackson = '3.1.1'
+jackson-annotations = '2.21'
 
 # Jakarta
 jakarta = '3.0.0'
 
 # Java
-java = '21'
+java = '25'
 
 # Kotlin
-kotlin = '2.2.20'
+kotlin = '2.3.20'
 
 # Minecraft
-minecraft = '1.21.11'
-
-# Yarn
-yarn = '1.21.11+build.3'
+minecraft = '26.1'
 
 [libraries]
 
@@ -46,13 +43,10 @@ jakarta-annotation-api = {group = 'jakarta.annotation', name = 'jakarta.annotati
 # Minecraft
 minecraft = {group = 'com.mojang', name = 'minecraft', version.ref = 'minecraft'}
 
-# Yarn
-yarn = {group = 'net.fabricmc', name = 'yarn', version.ref = 'yarn'}
-
 [plugins]
 
 # Fabric
-fabric-loom = {id = 'fabric-loom', version.ref = 'fabric-loom'}
+fabric-loom = {id = 'net.fabricmc.fabric-loom', version.ref = 'fabric-loom'}
 
 # Kotlin
 kotlin-jvm = {id = 'org.jetbrains.kotlin.jvm', version.ref = 'kotlin'}
