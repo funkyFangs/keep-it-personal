@@ -1,5 +1,7 @@
 package io.funky.fangs.keep_it_personal;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import io.funky.fangs.keep_it_personal.command.*;
 import io.funky.fangs.keep_it_personal.configuration.KeepItPersonalConfiguration;
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
@@ -7,7 +9,7 @@ import io.funky.fangs.keep_it_personal.exception.KeepItPersonalException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.server.command.CommandManager;
+import net.minecraft.commands.CommandSourceStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class KeepItPersonalModInitializer implements ModInitializer {
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> {
-            final var kipCommand = CommandManager.literal(KeepItPersonalCommand.NAME);
+            final var kipCommand = LiteralArgumentBuilder.<CommandSourceStack>literal(KeepItPersonalCommand.NAME);
 
             dispatcher.register(
                     kipCommand.requires(Permissions.require(KeepItPersonalCommand.PERMISSION, permissionLevel))
@@ -47,10 +49,10 @@ public class KeepItPersonalModInitializer implements ModInitializer {
                 if (!enabled.contains(deathPreference) && !disabled.contains(deathPreference)) {
                     final var permission = KeepItPersonalCommand.PERMISSION + '.' + deathPreference;
                     dispatcher.register(
-                            kipCommand.then(CommandManager.literal(deathPreference.toString())
+                            kipCommand.then(LiteralArgumentBuilder.<CommandSourceStack>literal(deathPreference.toString())
                                     .requires(Permissions.require(permission, permissionLevel))
                                     .executes(new GetDeathPreferenceCommand(deathPreference))
-                                    .then(CommandManager.argument(ModifyDeathPreferenceCommand.PARAMETER, bool())
+                                    .then(RequiredArgumentBuilder.<CommandSourceStack, Boolean>argument(ModifyDeathPreferenceCommand.PARAMETER, bool())
                                             .requires(Permissions.require(permission, permissionLevel))
                                             .executes(new ModifyDeathPreferenceCommand(deathPreference))
                                     )
@@ -60,14 +62,14 @@ public class KeepItPersonalModInitializer implements ModInitializer {
             }
 
             dispatcher.register(
-                    kipCommand.then(CommandManager.literal(FillDeathPreferencesCommand.NAME)
+                    kipCommand.then(LiteralArgumentBuilder.<CommandSourceStack>literal(FillDeathPreferencesCommand.NAME)
                             .requires(Permissions.require(FillDeathPreferencesCommand.PERMISSION, permissionLevel))
                             .executes(new FillDeathPreferencesCommand())
                     )
             );
 
             dispatcher.register(
-                    kipCommand.then(CommandManager.literal(ClearDeathPreferencesCommand.NAME)
+                    kipCommand.then(LiteralArgumentBuilder.<CommandSourceStack>literal(ClearDeathPreferencesCommand.NAME)
                             .requires(Permissions.require(ClearDeathPreferencesCommand.PERMISSION, permissionLevel))
                             .executes(new ClearDeathPreferencesCommand())
                     )

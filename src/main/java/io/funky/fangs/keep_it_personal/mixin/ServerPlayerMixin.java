@@ -5,16 +5,16 @@ import io.funky.fangs.keep_it_personal.configuration.KeepItPersonalConfiguration
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
 import jakarta.annotation.Nonnull;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.rule.GameRules;
+import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,14 +23,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.*;
+import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.getItemPredicates;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.function.Predicate.not;
 
-@Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity implements DeathPreferenceContainer {
+@Mixin(ServerPlayer.class)
+public abstract class ServerPlayerMixin extends Player implements DeathPreferenceContainer {
     @Unique
     private static final String DEATH_PREFERENCES_KEY = "death_preferences";
 
@@ -40,67 +41,69 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
         return enabled.isEmpty() ? EnumSet.noneOf(DeathPreference.class) : EnumSet.copyOf(enabled);
     }
 
-    public ServerPlayerEntityMixin(MinecraftServer ignoredServer, ServerWorld world, GameProfile profile, SyncedClientOptions clientOptions) {
-        super(world, profile);
+    public ServerPlayerMixin(final MinecraftServer ignoredServer, final ServerLevel level, final GameProfile gameProfile, final ClientInformation ignoredClientInformation) {
+        super(level, gameProfile);
     }
 
     @Shadow
-    public abstract ServerWorld getEntityWorld();
+    public abstract @NonNull ServerLevel level();
 
     @Unique
     public final EnumSet<DeathPreference> deathPreferences = getInitialDeathPreferences();
 
-    /**
-     * This method copies over the inventory and experience from the old {@link ServerPlayerEntity} based on the
-     * selected {@link DeathPreference}s.
-     */
-    @Inject(method = "copyFrom", at = @At("TAIL"))
-    public void afterCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo callbackInfo) {
+    @Inject(method = "restoreFrom", at = @At("HEAD"))
+    public void beforeRestoreFrom(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
         if (oldPlayer instanceof DeathPreferenceContainer container) {
+            clearDeathPreferences();
             deathPreferences.addAll(container.getDeathPreferences());
         }
+    }
 
-        if (!alive && shouldDropInventory()) {
-            if (deathPreferences.contains(DeathPreference.EXPERIENCE)) {
-                experienceLevel = oldPlayer.experienceLevel;
-                totalExperience = oldPlayer.totalExperience;
-                experienceProgress = oldPlayer.experienceProgress;
-            }
-
+    @Inject(method = "restoreFrom", at = @At("TAIL"))
+    public void afterRestoreFrom(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
+        if (shouldDropInventory()) {
+            final var currentInventory = getInventory();
             final var oldInventory = oldPlayer.getInventory();
-            final var inventory = getInventory();
             final var itemPredicates = getItemPredicates(deathPreferences);
 
             if (!itemPredicates.isEmpty()) {
-                for (int i = 0; i < oldInventory.size(); i += 1) {
-                    final int slotId = i;
-                    final var itemStack = oldInventory.getStack(slotId);
-                    if (itemPredicates.stream().anyMatch(predicate -> predicate.test(itemStack, slotId))) {
-                        inventory.setStack(slotId, itemStack);
+                final var matchPredicate = itemPredicates.stream().reduce(BiPredicate::or).get();
+
+                for (int slotId = 0; slotId < oldInventory.getContainerSize(); slotId += 1) {
+                    final var itemStack = oldInventory.getItem(slotId);
+
+                    if (matchPredicate.test(itemStack, slotId) && !itemStack.isEmpty()) {
+                        currentInventory.setItem(slotId, itemStack);
                     }
                 }
 
                 if (deathPreferences.contains(DeathPreference.HOTBAR)) {
-                    inventory.setSelectedSlot(oldInventory.getSelectedSlot());
+                    currentInventory.setSelectedSlot(oldInventory.getSelectedSlot());
                 }
+            }
+
+            if (hasDeathPreference(DeathPreference.EXPERIENCE)) {
+                experienceProgress = oldPlayer.experienceProgress;
+                experienceLevel = oldPlayer.experienceLevel;
+                totalExperience = oldPlayer.totalExperience;
             }
         }
     }
 
     /**
-     * @return true if {@link GameRules#KEEP_INVENTORY} is enabled or the player is in {@link GameMode#SPECTATOR} mode
+     * @return true if {@link GameRules#KEEP_INVENTORY} is enabled or the player is in {@link GameType#SPECTATOR} mode
      */
     @Unique
     private boolean shouldDropInventory() {
-        return !(getEntityWorld().getGameRules().getValue(GameRules.KEEP_INVENTORY) || isSpectator());
+        return !(level().getGameRules().get(GameRules.KEEP_INVENTORY) || isSpectator());
     }
 
     /**
-     * Reads the {@link #deathPreferences} from the {@link NbtCompound}
+     * Reads the {@link #deathPreferences} from the {@link ValueInput}
      */
-    @Inject(method = "readCustomData", at = @At("TAIL"))
-    protected void afterReadCustomData(ReadView view, CallbackInfo callbackInfo) {
-        view.getOptionalIntArray(DEATH_PREFERENCES_KEY)
+    @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
+    protected void afterReadAdditionalSaveData(final ValueInput input, CallbackInfo callbackInfo) {
+        input.getIntArray(DEATH_PREFERENCES_KEY)
                 .ifPresent(ordinals -> {
                     deathPreferences.clear();
 
@@ -120,10 +123,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
     }
 
     /**
-     * Writes the {@link #deathPreferences} to the {@link NbtCompound}
+     * Writes the {@link #deathPreferences} to the {@link ValueOutput}
      */
-    @Inject(method = "writeCustomData", at = @At("TAIL"))
-    public void afterWriteCustomData(WriteView view, CallbackInfo callbackInfo) {
+    @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
+    public void afterAddAdditionalSaveData(ValueOutput output, CallbackInfo callbackInfo) {
         final var preferences = KeepItPersonalConfiguration.getInstance().preferences();
         final var enabled = preferences.enabled();
         final var disabled = preferences.disabled();
@@ -136,7 +139,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements De
                 .mapToInt(DeathPreference::ordinal)
                 .toArray();
 
-        view.putIntArray(DEATH_PREFERENCES_KEY, ordinals);
+        output.putIntArray(DEATH_PREFERENCES_KEY, ordinals);
     }
 
     @Nonnull

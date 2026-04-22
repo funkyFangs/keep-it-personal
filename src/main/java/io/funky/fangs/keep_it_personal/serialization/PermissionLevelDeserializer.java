@@ -1,6 +1,6 @@
 package io.funky.fangs.keep_it_personal.serialization;
 
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.server.permissions.PermissionLevel;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
@@ -22,7 +22,7 @@ public class PermissionLevelDeserializer extends StdDeserializer<PermissionLevel
      * This is a mapping of each {@link PermissionLevel} from its name to itself for lookup during deserialization.
      */
     private static final Map<String, PermissionLevel> PERMISSION_LEVEL_NAME_MAP = Stream.of(PermissionLevel.values())
-            .collect(toUnmodifiableMap(PermissionLevel::asString, Function.identity()));
+            .collect(toUnmodifiableMap(PermissionLevel::getSerializedName, Function.identity()));
 
     public PermissionLevelDeserializer() {
         // PermissionLevel is an enum and cannot be extended
@@ -38,7 +38,7 @@ public class PermissionLevelDeserializer extends StdDeserializer<PermissionLevel
         if (NUMERIC_PERMISSION_LEVEL_PATTERN.matcher(token).matches()) {
             try {
                 final int numericPermissionLevel = Integer.parseInt(token);
-                permissionLevel = PermissionLevel.fromLevel(numericPermissionLevel);
+                permissionLevel = PermissionLevel.byId(numericPermissionLevel);
             }
             catch (NumberFormatException ignored) {
                 permissionLevel = null;

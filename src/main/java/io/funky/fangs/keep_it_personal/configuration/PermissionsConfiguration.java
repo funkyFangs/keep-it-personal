@@ -1,6 +1,6 @@
 package io.funky.fangs.keep_it_personal.configuration;
 
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public record PermissionsConfiguration(
         PermissionLevel permissionLevel

@@ -2,17 +2,15 @@ package io.funky.fangs.keep_it_personal.utility;
 
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import jakarta.annotation.Nonnull;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.*;
 import java.util.function.BiPredicate;
 
 import static java.util.Collections.unmodifiableMap;
-import static net.minecraft.entity.EquipmentSlot.FEET;
-import static net.minecraft.entity.EquipmentSlot.HEAD;
-import static net.minecraft.entity.player.PlayerInventory.*;
+import static net.minecraft.world.entity.EquipmentSlot.*;
+import static net.minecraft.world.entity.player.Inventory.*;
 
 public final class InventoryUtilities {
     private InventoryUtilities() throws IllegalAccessException {
@@ -28,7 +26,7 @@ public final class InventoryUtilities {
      * @see #ITEM_PREDICATES
      */
     private static boolean isHotbarItem(ItemStack ignoredItemStack, Integer slotId) {
-        return slotId >= 0 && slotId < HOTBAR_SIZE;
+        return slotId >= 0 && slotId < SELECTION_SIZE;
     }
 
     /**
@@ -40,7 +38,7 @@ public final class InventoryUtilities {
      * @see #ITEM_PREDICATES
      */
     private static boolean isInventoryItem(ItemStack ignoredItemStack, Integer slotId) {
-        return slotId >= HOTBAR_SIZE && slotId < MAIN_SIZE;
+        return slotId >= SELECTION_SIZE && slotId < INVENTORY_SIZE;
     }
 
     /**
@@ -52,7 +50,7 @@ public final class InventoryUtilities {
      * @see #ITEM_PREDICATES
      */
     private static boolean isArmorItem(ItemStack ignoredItemStack, Integer slotId) {
-        return slotId >= FEET.getOffsetEntitySlotId(MAIN_SIZE) && slotId <= HEAD.getOffsetEntitySlotId(MAIN_SIZE);
+        return slotId >= FEET.getIndex(INVENTORY_SIZE) && slotId <= HEAD.getIndex(INVENTORY_SIZE);
     }
 
     /**
@@ -64,22 +62,22 @@ public final class InventoryUtilities {
      * @see #ITEM_PREDICATES
      */
     private static boolean isOffhandItem(ItemStack ignoredItemStack, Integer slotId) {
-        return slotId == OFF_HAND_SLOT;
+        return slotId == SLOT_OFFHAND;
     }
 
     /**
      * This method is a {@link BiPredicate} for use in {@link #ITEM_PREDICATES} which determines if an item is cursed.
-     * Cursed items have the enchantment effect {@link EnchantmentEffectComponentTypes#PREVENT_EQUIPMENT_DROP}.
+     * Cursed items have the enchantment effect {@link Enchantments#VANISHING_CURSE}.
      * @param itemStack the {@link ItemStack} to check
      * @param ignoredSlotId unused because only the {@link ItemStack} is needed to make this determination
      * @return if the item is a cursed item
      * @see #ITEM_PREDICATES
      */
     private static boolean isCursedItem(ItemStack itemStack, Integer ignoredSlotId) {
-        return EnchantmentHelper.hasAnyEnchantmentsWith(
-                itemStack,
-                EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP
-        );
+        return itemStack.getEnchantments()
+                .keySet()
+                .stream()
+                .anyMatch(enchantmentHolder -> enchantmentHolder.is(Enchantments.VANISHING_CURSE));
     }
 
     /**

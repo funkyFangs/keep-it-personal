@@ -4,7 +4,7 @@ import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.exception.KeepItPersonalException;
 import io.funky.fangs.keep_it_personal.serialization.PermissionLevelDeserializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.server.permissions.PermissionLevel;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.dataformat.toml.TomlMapper;
 
@@ -39,7 +39,7 @@ public record KeepItPersonalConfiguration(
             """.stripIndent().trim().formatted(
                     toString(DEFAULT_ENABLED),
                     toString(DEFAULT_DISABLED),
-                    DEFAULT_PERMISSION_LEVEL.asString()
+                    DEFAULT_PERMISSION_LEVEL.getSerializedName()
             );
 
     private static String toString(Set<DeathPreference> preferences) {
