@@ -7,7 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -20,7 +20,7 @@ import static io.funky.fangs.keep_it_personal.utility.InventoryUtilities.*;
 @Mixin(Player.class)
 public abstract class PlayerMixin extends LivingEntity {
     public PlayerMixin(final Level level, final GameProfile ignoredGameProfile) {
-        super(EntityType.PLAYER, level);
+        super(EntityTypes.PLAYER, level);
     }
 
     @WrapMethod(method = "isAlwaysExperienceDropper")
