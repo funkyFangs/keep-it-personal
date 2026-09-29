@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import io.funky.fangs.keep_it_personal.domain.DeathPreference;
 import io.funky.fangs.keep_it_personal.domain.DeathPreferenceContainer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -55,7 +56,7 @@ public abstract class PlayerMixin extends LivingEntity {
                     final var itemStack = inventory.getItem(slotId);
 
                     if (!itemStack.isEmpty() && itemPredicates.stream().noneMatch(predicate -> predicate.test(itemStack, slotId))) {
-                        drop(itemStack, true, false);
+                        drop(itemStack, false, Prediction.PREDICTED);
                         inventory.removeItem(itemStack);
                     }
                 }
