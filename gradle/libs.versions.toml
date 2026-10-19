@@ -2,9 +2,9 @@
 
 # Fabric
 # check these on https://modmuss50.me/fabric.html
-fabric-api = '0.161.0+26.3'
-fabric-loader = '0.19.5'
-fabric-loom = '1.17.21'
+fabric-api = '0.164.0+26.3'
+fabric-loader = '0.20.1'
+fabric-loom = '1.19.1'
 fabric-permissions-api = '0.7.0'
 
 # Jackson
